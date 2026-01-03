@@ -42,11 +42,12 @@
 
 <!-- 背景音乐 -->
 <audio id="bgMusic" src="bgmusic.mp3" loop></audio>
-<!-- 点击音效 -->
-<audio id="clickSound" src="click.mp3"></audio>
+
+<!-- 点击音效（可选，如果没上传也不会报错） -->
+<audio id="clickSound"></audio>
 
 <script>
-// ----------- 默认图片数组（根目录单张图片） -----------
+// ----------- 默认图片数组 -----------
 const defaultImages = Array.from({length:70}, (_,i) =>
   `${String(i+1).padStart(3,"0")}.jpg`
 );
@@ -57,13 +58,31 @@ let streak = 0;
 let currentPair = [];
 let lastLoser = null;
 let reviveUsed = false;
+let firstClickDone = false; // 用于判断用户第一次点击
 
-// 播放背景音乐（iPad 需要用户操作才能开始）
-function startMusic() {
-  const bg = document.getElementById('bgMusic');
-  bg.play().catch(()=>console.log("点击开始音乐"));
+// 彩带特效
+function confettiEffect(count=30){
+  for(let i=0;i<count;i++){
+    const conf = document.createElement('div');
+    conf.className='confetti';
+    conf.style.left = Math.random()*100+'vw';
+    conf.style.backgroundColor = `hsl(${Math.random()*360}, 80%, 60%)`;
+    conf.style.width = conf.style.height = (5+Math.random()*10)+'px';
+    document.body.appendChild(conf);
+    setTimeout(()=>conf.remove(),3000);
+  }
 }
-document.body.onclick = startMusic;
+
+// 用户第一次点击，启动背景音乐 + 小彩带
+function handleFirstClick() {
+  if(!firstClickDone){
+    firstClickDone = true;
+    const bg = document.getElementById('bgMusic');
+    bg.play().catch(()=>console.log("点击开始音乐"));
+    confettiEffect(20);
+  }
+}
+document.body.addEventListener('click', handleFirstClick, { once: true });
 
 // 随机生成下一对图片
 function nextPair() {
@@ -98,22 +117,11 @@ function nextPair() {
   document.getElementById('status').textContent = `点击你喜欢的图片`;
 }
 
-// 彩带特效
-function confettiEffect(count=30){
-  for(let i=0;i<count;i++){
-    const conf = document.createElement('div');
-    conf.className='confetti';
-    conf.style.left = Math.random()*100+'vw';
-    conf.style.backgroundColor = `hsl(${Math.random()*360}, 80%, 60%)`;
-    conf.style.width = conf.style.height = (5+Math.random()*10)+'px';
-    document.body.appendChild(conf);
-    setTimeout(()=>conf.remove(),3000);
-  }
-}
-
 // 点击选择
 function selectImage(selectedIdx) {
-  document.getElementById('clickSound').play();
+  // 播放点击音效（如果存在才播放）
+  const clickSound = document.getElementById('clickSound');
+  if(clickSound && clickSound.src) clickSound.play();
 
   let winner = currentPair[selectedIdx];
   let loser = currentPair[1 - selectedIdx];
