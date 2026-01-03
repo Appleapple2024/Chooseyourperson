@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>淘汰图片游戏</title>
+<title>你对谁最心动？>xuan ch
 <style>
   body { font-family: sans-serif; text-align: center; background: #f9f9f9; overflow-x: hidden; }
   img { max-width: 45%; margin: 1%; cursor: pointer; border: 3px solid #ccc; border-radius: 10px; transition: all 0.3s; }
@@ -31,13 +31,13 @@
 </style>
 </head>
 <body>
-<h1>淘汰图片游戏</h1>
-<div id="status">点击图片选择你喜欢的</div>
+<h1>你对谁最心动？>ni d
+<div id="status">选择你的心选姐>de>de
 <div>
   <img id="img1" src="" alt="">
   <img id="img2" src="" alt="">
 </div>
-<button id="reviveBtn">复活一次失败的图片</button>
+<button id="reviveBtn">复活一次</button>
 <div id="winnerBanner"></div>
 
 <!-- 背景音乐 -->
@@ -100,7 +100,7 @@ function nextPair() {
     currentPair = [pool[0]];
     document.getElementById('img1').src = pool[0];
     document.getElementById('img2').style.display = 'none';
-    document.getElementById('status').textContent = '最后一张，点击选择胜者';
+    document.getElementById('status').textContent = '最后一张，到底是谁呢';
     return;
   } else {
     document.getElementById('img2').style.display = 'inline';
@@ -114,7 +114,7 @@ function nextPair() {
   currentPair = [img1,img2];
   document.getElementById('img1').src = img1;
   document.getElementById('img2').src = img2;
-  document.getElementById('status').textContent = `点击你喜欢的图片`;
+  document.getElementById('status').textContent = `点击你的偏好`;
 }
 
 // 点击选择
@@ -178,7 +178,7 @@ function showChampion(img) {
   document.getElementById('reviveBtn').style.display = 'none';
 
   const banner = document.getElementById('winnerBanner');
-  banner.textContent = `冠军生存海报 🎉`;
+  banner.textContent = `心选姐就是她 🎉`;
   banner.style.display = 'block';
 
   const champImg = document.createElement('img');
