@@ -4,54 +4,17 @@
 <meta charset="UTF-8">
 <title>心动淘汰赛</title>
 <style>
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
-  text-align: center;
-  background: #fafafa;
-  overflow-x: hidden;
-}
-h1 { margin-top: 20px; }
-img {
-  max-width: 45%;
-  margin: 1%;
-  cursor: pointer;
-  border: 3px solid #ddd;
-  border-radius: 14px;
-  transition: all 0.25s ease;
-}
-img:hover {
-  transform: scale(1.06);
-  border-color: hotpink;
-}
-#status { margin: 18px; font-size: 1.2em; }
-#winnerBanner {
-  font-size: 2em;
-  margin-top: 30px;
-  display: none;
-}
-#reviveBtn {
-  display: none;
-  margin: 14px auto;
-  padding: 10px 22px;
-  font-size: 1em;
-  cursor: pointer;
-  border-radius: 20px;
-  border: none;
-  background: linear-gradient(135deg,#ffb6c1,#ffd1dc);
-}
-.confetti {
-  position: fixed;
-  width: 8px;
-  height: 8px;
-  top: -10px;
-  z-index: 9999;
-  pointer-events: none;
-  animation: fall linear forwards;
-}
-@keyframes fall { from { transform: translateY(0) rotate(0deg); } to { transform: translateY(100vh) rotate(360deg); } }
-/* 复活闪烁 */
-.flash { animation: flashAnim 1s ease 0s 3; }
-@keyframes flashAnim { 0%,100%{opacity:1;}50%{opacity:0;} }
+body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif; text-align:center; background:#fafafa; overflow-x:hidden; }
+h1{margin-top:20px;}
+img{max-width:45%;margin:1%;cursor:pointer;border:3px solid #ddd;border-radius:14px;transition:all 0.25s ease;}
+img:hover{transform:scale(1.06);border-color:hotpink;}
+#status{margin:18px;font-size:1.2em;}
+#winnerBanner{font-size:2em;margin-top:30px;display:none;}
+#reviveBtn{display:none;margin:14px auto;padding:10px 22px;font-size:1em;cursor:pointer;border-radius:20px;border:none;background:linear-gradient(135deg,#ffb6c1,#ffd1dc);}
+.confetti{position:fixed;width:8px;height:8px;top:-10px;z-index:9999;pointer-events:none;animation:fall linear forwards;}
+@keyframes fall{from{transform:translateY(0) rotate(0deg);} to{transform:translateY(100vh) rotate(360deg);}}
+.flash{animation:flashAnim 1s ease 0s 3;}
+@keyframes flashAnim{0%,100%{opacity:1;}50%{opacity:0;}}
 </style>
 </head>
 <body>
@@ -73,11 +36,12 @@ img:hover {
 <script>
 // ===== 默认图片 =====
 const defaultImages = Array.from({length:70},(_,i)=>`${String(i+1).padStart(3,"0")}.jpg`);
-let pool = [...defaultImages]; // 当前轮参赛者
-let winners = [];               // 胜者池
+let pool = [...defaultImages];   // 当前轮参赛队列
+let winners = [];                 // 胜者池
 let lastLoser = null;
 let reviveUsed = false;
 let streak = 0;
+let streakPlayer = null;
 let currentPair = [];
 let firstClickDone = false;
 let reviveFlashNext = false;
@@ -106,10 +70,13 @@ document.body.addEventListener('click',()=>{
 
 // ===== 下一对 =====
 function nextPair(){
-  // 如果 pool 空了且 winners 不为空，将 winners 转为新 pool
+  // 当前轮结束，将 winners 转为新 pool
   if(pool.length===0){
     if(winners.length===1){
       showChampion(winners[0]);
+      return;
+    } else if(winners.length===0){
+      status.textContent='好像没人了？';
       return;
     }
     pool = [...winners];
@@ -122,7 +89,6 @@ function nextPair(){
     img1.src=pool[0];
     img2.style.display='none';
     status.textContent='最后一眼了，你确定是她吗？';
-    // 闪烁提示
     if(reviveFlashNext && pool[0]===lastLoser){
       img1.classList.add('flash');
       setTimeout(()=>img1.classList.remove('flash'),3000);
@@ -140,7 +106,7 @@ function nextPair(){
   img2.src=b;
   status.textContent='别犹豫，你对谁最心动？';
 
-  // 闪烁提示
+  // 复活闪烁提示
   if(reviveFlashNext){
     const flashImg = (a===lastLoser)? img1 : (b===lastLoser)? img2 : null;
     if(flashImg){
@@ -153,19 +119,29 @@ function nextPair(){
 
 // ===== 点击选择 =====
 function selectImage(idx){
-  const winner=currentPair[idx];
-  const loser=currentPair[1-idx];
+  const winner = currentPair[idx];
+  const loser = currentPair[1-idx];
+
   winners.push(winner);
-  lastLoser=loser;
-  streak++;
+  lastLoser = loser;
+
+  // streak计算：连续同一人胜利才累积
+  if(streakPlayer===winner){
+    streak++;
+  } else {
+    streak=1;
+    streakPlayer=winner;
+  }
+
   status.textContent=`已经连续 ${streak} 次为她心动了 💓`;
   if([10,20,30].includes(streak)) confettiEffect(80);
   if(!reviveUsed) reviveBtn.style.display='inline';
+
   nextPair();
 }
 
 // ===== 复活按钮 =====
-reviveBtn.onclick=()=>{
+reviveBtn.onclick = ()=>{
   if(lastLoser && !reviveUsed){
     pool.unshift(lastLoser); // 优先出场
     reviveUsed=true;
