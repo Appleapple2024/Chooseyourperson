@@ -58,7 +58,7 @@
 <script>
 /* ====== 1. 默认图片（70 张） ====== */
 const defaultImages = Array.from({length:70}, (_,i) =>
-  `images/${String(i+1).padStart(3,"0")}.jpg`
+  `${String(i+1).padStart(3,"0")}.jpg`
 );
 
 /* ====== 2. 用户图片 ====== */
