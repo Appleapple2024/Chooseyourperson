@@ -10,9 +10,7 @@
     background: #fafafa;
     overflow-x: hidden;
   }
-  h1 {
-    margin-top: 20px;
-  }
+  h1 { margin-top: 20px; }
   img {
     max-width: 45%;
     margin: 1%;
@@ -25,10 +23,7 @@
     transform: scale(1.06);
     border-color: hotpink;
   }
-  #status {
-    margin: 18px;
-    font-size: 1.2em;
-  }
+  #status { margin: 18px; font-size: 1.2em; }
   #winnerBanner {
     font-size: 2em;
     margin-top: 30px;
@@ -53,9 +48,14 @@
     pointer-events: none;
     animation: fall linear forwards;
   }
-  @keyframes fall {
-    from { transform: translateY(0) rotate(0deg); }
-    to   { transform: translateY(100vh) rotate(360deg); }
+  @keyframes fall { from { transform: translateY(0) rotate(0deg); } to { transform: translateY(100vh) rotate(360deg); } }
+  /* ===== 复活闪烁动画 ===== */
+  .flash {
+    animation: flashAnim 1s ease 0s 3;
+  }
+  @keyframes flashAnim {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0; }
   }
 </style>
 </head>
@@ -74,25 +74,22 @@
 
 <div id="winnerBanner"></div>
 
-<!-- 背景音乐（双格式） -->
 <audio id="bgMusic" loop>
   <source src="bgmusic.mp3" type="audio/mpeg">
   <source src="bgmusic.m4a" type="audio/mp4">
 </audio>
 
 <script>
-/* ===== 默认图片 ===== */
-const defaultImages = Array.from({length:70}, (_,i)=>
-  `${String(i+1).padStart(3,"0")}.jpg`
-);
+const defaultImages = Array.from({length:70}, (_,i)=>`${String(i+1).padStart(3,"0")}.jpg`);
 
 let pool = [...defaultImages];
 let winners = [];
-let streak = 0;
-let currentPair = [];
 let lastLoser = null;
 let reviveUsed = false;
+let streak = 0;
+let currentPair = [];
 let firstClickDone = false;
+let reviveFlashNext = false; // ✅ 复活闪烁标记
 
 /* ===== 彩带 ===== */
 function confettiEffect(count=40){
@@ -107,7 +104,7 @@ function confettiEffect(count=40){
   }
 }
 
-/* ===== 第一次点击：音乐 + 小彩蛋 ===== */
+/* ===== 第一次点击 ===== */
 document.body.addEventListener('click',()=>{
   if(!firstClickDone){
     firstClickDone = true;
@@ -116,45 +113,56 @@ document.body.addEventListener('click',()=>{
   }
 },{once:true});
 
-/* ===== 下一组 ===== */
+/* ===== 配对下一场 ===== */
 function nextPair(){
-  if(pool.length===0 && winners.length===1){
-    showChampion(winners[0]);
-    return;
-  }
   if(pool.length===0){
-    pool=[...winners];
-    winners=[];
+    if(winners.length===1){
+      showChampion(winners[0]);
+      return;
+    } else if(winners.length===0){
+      status.textContent = '嗯...好像没人了？';
+      return;
+    } else {
+      pool = [...winners];
+      winners = [];
+    }
   }
+
   if(pool.length===1){
-    currentPair=[pool[0]];
-    document.getElementById('img1').src=pool[0];
-    document.getElementById('img2').style.display='none';
-    document.getElementById('status').textContent='最后一眼了，你确定是她吗？';
+    currentPair = [pool[0]];
+    img1.src = pool[0];
+    img2.style.display = 'none';
+    status.textContent = '最后一眼了，你确定是她吗？';
     return;
   } else {
-    document.getElementById('img2').style.display='inline';
+    img2.style.display = 'inline';
   }
 
-  const a = pool.splice(Math.floor(Math.random()*pool.length),1)[0];
-  const b = pool.splice(Math.floor(Math.random()*pool.length),1)[0];
-  currentPair=[a,b];
+  const a = pool.shift();
+  const b = pool.shift();
+  currentPair = [a,b];
+  img1.src = a;
+  img2.src = b;
+  status.textContent = '别犹豫，你对谁最心动？';
 
-  img1.src=a;
-  img2.src=b;
-  status.textContent='别犹豫，你对谁最心动？';
+  // ✅ 复活闪烁提示
+  if(reviveFlashNext){
+    const flashImg = img1.src===lastLoser ? img1 : img2;
+    flashImg.classList.add('flash');
+    setTimeout(()=>flashImg.classList.remove('flash'), 3000);
+    reviveFlashNext = false;
+  }
 }
 
 /* ===== 点击选择 ===== */
 function selectImage(idx){
-  const winner=currentPair[idx];
-  const loser=currentPair[1-idx];
+  const winner = currentPair[idx];
+  const loser = currentPair[1-idx];
 
   winners.push(winner);
-  lastLoser=loser;
+  lastLoser = loser;
   streak++;
-
-  status.textContent=`已经连续 ${streak} 次为她心动了 💓`;
+  status.textContent = `已经连续 ${streak} 次为她心动了 💓`;
 
   if([10,20,30].includes(streak)){
     confettiEffect(80);
@@ -167,18 +175,19 @@ function selectImage(idx){
   nextPair();
 }
 
-/* ===== 复活 ===== */
-reviveBtn.onclick=()=>{
+/* ===== 复活按钮（优先出场 + 闪烁提示） ===== */
+reviveBtn.onclick = ()=>{
   if(lastLoser && !reviveUsed){
-    pool.push(lastLoser);
-    reviveUsed=true;
+    pool.unshift(lastLoser);
+    reviveUsed = true;
     reviveBtn.style.display='none';
-    status.textContent='行吧，这次算你心软 😌';
+    status.textContent = '行吧，这次算你心软 😌';
     confettiEffect(12);
+    reviveFlashNext = true; // 标记下一场闪烁
   }
 };
 
-/* ===== 冠军 ===== */
+/* ===== 冠军显示 ===== */
 function showChampion(img){
   img1.style.display='none';
   img2.style.display='none';
@@ -188,8 +197,8 @@ function showChampion(img){
   winnerBanner.style.display='block';
   winnerBanner.innerHTML='🎉 原来她一直都是你的心选姐 🎉<br>';
 
-  const c=document.createElement('img');
-  c.src=img;
+  const c = document.createElement('img');
+  c.src = img;
   c.style.maxWidth='55%';
   c.style.border='6px solid gold';
   c.style.borderRadius='18px';
@@ -198,7 +207,7 @@ function showChampion(img){
   confettiEffect(120);
 }
 
-/* ===== 绑定 ===== */
+/* ===== 绑定点击 ===== */
 img1.onclick=()=>selectImage(0);
 img2.onclick=()=>selectImage(1);
 
