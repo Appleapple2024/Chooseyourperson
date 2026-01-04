@@ -18,20 +18,20 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 12px;
+  padding: 10px;
 }
 
 h1 {
-  margin: 0 0 8px;
-  font-size: clamp(1.5em, 4vw, 2em);
+  margin: 0 0 6px;
+  font-size: clamp(1.5em, 5vw, 2.2em);
   color: #ff6b9d;
   flex-shrink: 0;
 }
 
 #status {
-  margin: 0 0 12px;
-  font-size: clamp(1em, 3vw, 1.3em);
-  min-height: 2.5em;
+  margin: 0 0 10px;
+  font-size: clamp(1em, 4vw, 1.3em);
+  min-height: 2.2em;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -44,45 +44,43 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 15px;
-  margin: 0 0 10px;
+  gap: 10px; /* 减少间距 */
+  margin: 0 0 8px;
   flex: 1;
   width: 100%;
-  min-height: 180px;
+  min-height: 150px;
 }
 
 .image-wrapper {
   flex: 1;
-  max-width: 48%;
+  max-width: 49%; /* 增大到49% */
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 2px solid #eee;
-  border-radius: 12px;
+  border: 1px solid #eee; /* 边框变细 */
+  border-radius: 8px;
   background: #fff;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
   overflow: hidden;
   /* 高度通过JS动态设置 */
 }
 
 img {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
+  width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: contain; /* 完整显示，不裁剪 */
   cursor: pointer;
-  border-radius: 8px;
-  transition: transform 0.2s;
+  border-radius: 7px;
+  transition: all 0.2s;
 }
 
 img:hover {
-  transform: scale(1.03);
+  transform: scale(1.02);
+  box-shadow: 0 0 15px rgba(255,105,180,0.2);
 }
 
 .controls {
-  margin: 10px 0 5px;
-  min-height: 50px;
+  margin: 8px 0 5px;
+  min-height: 45px;
   flex-shrink: 0;
 }
 
@@ -131,67 +129,78 @@ img:hover {
 }
 
 .winner-image {
-  max-width: 70%;
-  max-height: 50vh;
+  max-width: 80%;
+  max-height: 60vh;
   border: 6px solid gold !important;
   border-radius: 15px;
   margin: 15px auto;
 }
 
-/* 手机竖屏 */
-@media (max-width: 767px) and (orientation: portrait) {
+/* ===== 横屏优化 ===== */
+@media (orientation: landscape) {
   body {
-    padding: 10px;
+    padding: 8px;
   }
   
   .images-container {
-    gap: 12px;
+    gap: 15px; /* 横屏时稍宽间距 */
+  }
+  
+  .image-wrapper {
+    max-width: 48%;
+    border-width: 2px; /* 横屏时边框稍粗一点 */
   }
 }
 
-/* 手机横屏 */
-@media (max-width: 767px) and (orientation: landscape) {
-  .images-container {
-    gap: 20px;
-  }
-}
-
-/* iPad & 平板 */
-@media (min-width: 768px) {
+/* iPad横屏 - 最大化利用空间 */
+@media (min-width: 768px) and (orientation: landscape) {
   body {
-    padding: 20px;
+    padding: 15px;
   }
   
   h1 {
-    margin: 0 0 15px;
-    font-size: clamp(1.8em, 4vw, 2.5em);
+    margin: 0 0 10px;
+    font-size: clamp(1.8em, 5vw, 2.5em);
   }
   
   #status {
-    margin: 0 0 20px;
-    font-size: clamp(1.2em, 3vw, 1.5em);
+    margin: 0 0 15px;
+    font-size: clamp(1.2em, 4vw, 1.5em);
   }
   
   .images-container {
-    gap: 25px;
+    gap: 20px; /* iPad横屏间距更大 */
+  }
+  
+  .image-wrapper {
+    max-width: 47%; /* 在iPad上更大 */
+    border: 2px solid #ddd;
   }
 }
 
-/* iPad横屏 */
-@media (min-width: 768px) and (orientation: landscape) {
+/* 手机竖屏 */
+@media (max-width: 767px) and (orientation: portrait) {
+  body {
+    padding: 8px;
+  }
+  
   .images-container {
-    gap: 35px;
+    gap: 8px;
+  }
+  
+  .image-wrapper {
+    border: 1px solid #eee;
   }
 }
 
 /* 大屏幕 */
 @media (min-width: 1024px) {
-  body {
-    padding: 25px;
+  .images-container {
+    gap: 25px;
   }
   
-  .images-container {
-    gap: 40px;
+  .image-wrapper {
+    max-width: 46%;
   }
 }
 </style>
@@ -217,7 +226,7 @@ img:hover {
 
 <audio id="bgMusic" loop volume="0.35">
   <source src="bgmusic.mp3" type="audio/mpeg">
-  <source src="bgmusic.m4a" type="audio/mp4">
+  <source src="bgmusic.m4a" type="audio/m4a">
 </audio>
 
 <script>
@@ -225,6 +234,7 @@ img:hover {
 function calculateImageHeight() {
   const windowHeight = window.innerHeight;
   const windowWidth = window.innerWidth;
+  const isLandscape = windowWidth > windowHeight;
   
   // 计算标题和状态区域的高度
   const headerHeight = document.querySelector('h1').offsetHeight;
@@ -232,21 +242,32 @@ function calculateImageHeight() {
   const controlsHeight = document.querySelector('.controls').offsetHeight;
   
   // 计算可用高度（总高度减去其他元素高度和间距）
-  const padding = 50; // 上下padding预留空间
+  const padding = isLandscape ? 30 : 40; // 横屏时减少padding
   const availableHeight = windowHeight - headerHeight - statusHeight - controlsHeight - padding;
   
-  // 根据屏幕方向调整高度
+  // 根据设备和方向调整高度
   let imageHeight;
   
   if (windowWidth >= 768) { // iPad及以上
-    imageHeight = Math.min(availableHeight * 0.7, windowHeight * 0.55);
-    imageHeight = Math.max(imageHeight, 250); // 最小250px
-  } else if (windowWidth >= 480) { // 普通手机
-    imageHeight = Math.min(availableHeight * 0.65, windowHeight * 0.45);
-    imageHeight = Math.max(imageHeight, 180); // 最小180px
-  } else { // 小手机
-    imageHeight = Math.min(availableHeight * 0.6, windowHeight * 0.4);
-    imageHeight = Math.max(imageHeight, 150); // 最小150px
+    if (isLandscape) {
+      // iPad横屏：用更多空间
+      imageHeight = Math.min(availableHeight * 0.85, windowHeight * 0.65);
+      imageHeight = Math.max(imageHeight, 280);
+    } else {
+      // iPad竖屏
+      imageHeight = Math.min(availableHeight * 0.75, windowHeight * 0.55);
+      imageHeight = Math.max(imageHeight, 250);
+    }
+  } else { // 手机
+    if (isLandscape) {
+      // 手机横屏：充分利用宽度
+      imageHeight = Math.min(availableHeight * 0.80, windowHeight * 0.60);
+      imageHeight = Math.max(imageHeight, 200);
+    } else {
+      // 手机竖屏（保持你满意的尺寸）
+      imageHeight = Math.min(availableHeight * 0.70, windowHeight * 0.50);
+      imageHeight = Math.max(imageHeight, 180);
+    }
   }
   
   // 应用到图片容器
@@ -442,13 +463,13 @@ img2.onclick = () => selectImage(1);
 // ===== 启动游戏 =====
 updateGameState();
 
-// ===== 监听窗口大小变化 =====
+// ===== 监听窗口变化 =====
 window.addEventListener('resize', calculateImageHeight);
 window.addEventListener('orientationchange', () => {
   setTimeout(calculateImageHeight, 100);
 });
 
-// 初始计算图片高度
+// 初始计算
 setTimeout(calculateImageHeight, 50);
 </script>
 </body>
