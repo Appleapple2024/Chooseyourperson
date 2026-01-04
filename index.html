@@ -2,37 +2,210 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>你的心动姐是谁？>jie>ji心
+<title>你的心动姐是谁？</title>
 <style>
-body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif; text-align:center; background:#fafafa; }
-h1{margin-top:20px;}
-img{max-width:45%;margin:1%;cursor:pointer;border:3px solid #ddd;border-radius:14px;transition:0.25s;}
-img:hover{transform:scale(1.06);border-color:hotpink;}
-#status{margin:18px;font-size:1.2em;}
-#winnerBanner{font-size:2em;margin-top:30px;display:none;}
-#reviveBtn{display:none;margin:14px auto;padding:10px 22px;font-size:1em;cursor:pointer;border-radius:20px;border:none;background:linear-gradient(135deg,#ffb6c1,#ffd1dc);}
-.confetti{position:fixed;width:8px;height:8px;top:-10px;z-index:9999;pointer-events:none;animation:fall linear forwards;}
-@keyframes fall{from{transform:translateY(0) rotate(0deg);}to{transform:translateY(100vh) rotate(360deg);}}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; 
+  text-align: center; 
+  background: #fafafa;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 20px);
+  padding: 10px;
+}
+
+h1 {
+  margin: 10px 0;
+  font-size: 1.8em;
+  flex-shrink: 0;
+}
+
+#status {
+  margin: 10px 0;
+  font-size: 1.1em;
+  flex-shrink: 0;
+}
+
+.images-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  min-height: 0; /* 重要：防止图片撑开容器 */
+  padding: 10px;
+}
+
+.image-wrapper {
+  flex: 1;
+  height: 100%;
+  max-width: 48%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  cursor: pointer;
+  border: 3px solid #ddd;
+  border-radius: 14px;
+  transition: all 0.25s;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+img:hover {
+  transform: scale(1.03);
+  border-color: hotpink;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.controls {
+  flex-shrink: 0;
+  margin: 10px 0;
+  padding: 10px;
+}
+
+#winnerBanner {
+  font-size: 1.5em;
+  margin: 20px 0;
+  display: none;
+}
+
+#reviveBtn {
+  display: none;
+  margin: 10px auto;
+  padding: 10px 22px;
+  font-size: 1em;
+  cursor: pointer;
+  border-radius: 20px;
+  border: none;
+  background: linear-gradient(135deg, #ffb6c1, #ffd1dc);
+  transition: transform 0.2s;
+}
+
+#reviveBtn:hover {
+  transform: scale(1.05);
+}
+
+.confetti {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  top: -10px;
+  z-index: 9999;
+  pointer-events: none;
+  animation: fall linear forwards;
+}
+
+@keyframes fall {
+  from { transform: translateY(0) rotate(0deg); }
+  to { transform: translateY(100vh) rotate(360deg); }
+}
+
 .flash {
   animation: flash 0.5s 6 alternate;
   border-color: gold !important;
 }
+
 @keyframes flash {
   from { box-shadow: 0 0 5px gold; }
   to { box-shadow: 0 0 20px gold; }
+}
+
+.winner-image {
+  max-width: 50%;
+  max-height: 60vh;
+  border: 6px solid gold !important;
+  border-radius: 18px;
+  margin: 20px auto;
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.5em;
+    margin: 5px 0;
+  }
+  
+  #status {
+    font-size: 1em;
+    margin: 5px 0;
+  }
+  
+  .images-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .image-wrapper {
+    max-width: 90%;
+    max-height: 45%;
+  }
+  
+  .winner-image {
+    max-width: 80%;
+  }
+}
+
+@media (max-height: 700px) {
+  .container {
+    padding: 5px;
+  }
+  
+  h1 {
+    font-size: 1.5em;
+    margin: 5px 0;
+  }
+  
+  #status {
+    font-size: 0.9em;
+    margin: 5px 0;
+  }
+  
+  .images-container {
+    padding: 5px;
+  }
 }
 </style>
 </head>
 <body>
 
-<h1>💗 心动淘汰赛 💗</h1>
-<div id="status">来吧，第一眼——你对谁最心动？</div>
-<div>
-  <img id="img1" src="">
-  <img id="img2" src="">
+<div class="container">
+  <h1>💗 心动淘汰赛 💗</h1>
+  <div id="status">来吧，第一眼——你对谁最心动？</div>
+  
+  <div class="images-container">
+    <div class="image-wrapper">
+      <img id="img1" src="">
+    </div>
+    <div class="image-wrapper">
+      <img id="img2" src="">
+    </div>
+  </div>
+  
+  <div class="controls">
+    <button id="reviveBtn">等等我反悔了，再给她一次机会 😭</button>
+    <div id="winnerBanner"></div>
+  </div>
 </div>
-<button id="reviveBtn">等等我反悔了，再给她一次机会 😭</button>
-<div id="winnerBanner"></div>
 
 <audio id="bgMusic" loop>
   <source src="bgmusic.mp3" type="audio/mpeg">
@@ -137,8 +310,14 @@ function selectNextPair() {
   // 显示图片
   img1.src = currentPair[0];
   img2.src = currentPair[1];
-  img1.style.display = 'inline';
-  img2.style.display = 'inline';
+  img1.style.display = 'block';
+  img2.style.display = 'block';
+  
+  // 预加载图片以确保尺寸准确
+  [img1, img2].forEach(img => {
+    const image = new Image();
+    image.src = img.src;
+  });
   
   // 显示复活按钮
   if (lastLoser && !reviveUsed) {
@@ -222,13 +401,11 @@ function showChampion(img) {
   
   winnerBanner.style.display = 'block';
   winnerBanner.innerHTML = `
-    <div style="margin-bottom:20px;">
+    <div style="margin-bottom: 15px; font-weight: bold;">
       🎉 最终胜出！她就是你的心选 🎉
     </div>
-    <div>
-      <img src="${img}" style="max-width:55%; border:6px solid gold; border-radius:18px;">
-    </div>
-    <div style="margin-top:20px; font-size:0.8em;">
+    <img src="${img}" class="winner-image">
+    <div style="margin-top: 15px; font-size: 0.9em;">
       连胜记录：${streak} 次
     </div>
   `;
