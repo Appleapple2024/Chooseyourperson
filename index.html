@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <title>心动淘汰赛</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+
 <style>
 * {
   margin: 0;
@@ -19,6 +23,7 @@ body {
   display: flex;
   flex-direction: column;
   padding: 6px;
+  position: relative;
 }
 
 h1 {
@@ -44,7 +49,7 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 2px; /* 极小的间距 */
+  gap: 2px;
   margin: 0 0 4px;
   flex: 1;
   width: 100%;
@@ -53,19 +58,18 @@ h1 {
 
 .image-wrapper {
   flex: 1;
-  max-width: 49.8%; /* 几乎各占一半 */
+  max-width: 49.8%;
   display: flex;
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  /* 高度通过JS动态设置 */
 }
 
 img {
   width: auto;
   height: 100%;
   max-width: 100%;
-  object-fit: scale-down; /* 关键：等比例缩小，不裁剪 */
+  object-fit: scale-down;
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s;
@@ -102,6 +106,119 @@ img:hover {
   font-weight: 500;
 }
 
+/* 全球统计按钮 */
+#globalStatsBtn {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #36c, #69c);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 15px;
+  font-size: 0.85em;
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: 0 3px 10px rgba(51,102,204,0.3);
+  transition: all 0.3s;
+}
+
+#globalStatsBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(51,102,204,0.4);
+}
+
+#globalStatsPanel {
+  position: fixed;
+  bottom: 50px;
+  left: 10px;
+  width: 300px;
+  max-height: 400px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+  z-index: 100;
+  padding: 15px;
+  display: none;
+  border: 2px solid #36c;
+  overflow-y: auto;
+}
+
+#globalStatsPanel h3 {
+  margin: 0 0 12px;
+  color: #36c;
+  font-size: 1.1em;
+  text-align: center;
+}
+
+.stat-item {
+  margin: 8px 0;
+  padding: 6px;
+  border-radius: 8px;
+  background: #f8f9ff;
+  display: flex;
+  align-items: center;
+}
+
+.stat-rank {
+  width: 24px;
+  height: 24px;
+  background: #36c;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8em;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.stat-rank.gold { background: gold; color: #333; }
+.stat-rank.silver { background: #c0c0c0; }
+.stat-rank.bronze { background: #cd7f32; }
+
+.stat-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  margin-right: 10px;
+  object-fit: cover;
+  border: 2px solid #ddd;
+  flex-shrink: 0;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-name {
+  font-size: 0.9em;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.stat-votes {
+  font-size: 0.8em;
+  color: #666;
+}
+
+#totalVotes {
+  text-align: center;
+  margin: 10px 0;
+  padding-top: 10px;
+  border-top: 1px dashed #ddd;
+  font-size: 0.9em;
+  color: #36c;
+  font-weight: bold;
+}
+
+.loading {
+  text-align: center;
+  color: #888;
+  padding: 20px;
+}
+
 .confetti {
   position: fixed;
   width: 8px;
@@ -135,55 +252,23 @@ img:hover {
   object-fit: scale-down;
 }
 
-/* 横屏时 */
-@media (orientation: landscape) {
-  body {
-    padding: 8px;
-  }
-  
-  .images-container {
-    gap: 3px; /* 横屏也极小间距 */
-  }
-}
-
-/* iPad横屏 */
-@media (min-width: 768px) and (orientation: landscape) {
-  body {
-    padding: 10px;
-  }
-  
-  h1 {
-    margin: 0 0 6px;
-  }
-  
-  #status {
-    margin: 0 0 8px;
-  }
-  
-  .images-container {
-    gap: 4px;
-  }
-}
-
-/* 手机竖屏 */
 @media (max-width: 767px) and (orientation: portrait) {
   body {
     padding: 4px;
   }
   
   .images-container {
-    gap: 1px; /* 手机竖屏几乎无间距 */
+    gap: 1px;
   }
   
   img {
     border-radius: 3px;
   }
-}
-
-/* 大屏幕 */
-@media (min-width: 1024px) {
-  .images-container {
-    gap: 5px;
+  
+  #globalStatsPanel {
+    width: calc(100vw - 20px);
+    left: 10px;
+    bottom: 50px;
   }
 }
 </style>
@@ -207,78 +292,44 @@ img:hover {
   <div id="winnerBanner"></div>
 </div>
 
+<button id="globalStatsBtn">🌍 全球榜</button>
+<div id="globalStatsPanel">
+  <h3>🌐 全球心动排行榜</h3>
+  <div id="statsList" class="loading">正在加载全球数据...</div>
+  <div id="totalVotes">总投票数：--</div>
+</div>
+
 <audio id="bgMusic" loop volume="0.35">
   <source src="bgmusic.mp3" type="audio/mpeg">
   <source src="bgmusic.m4a" type="audio/m4a">
 </audio>
 
 <script>
-// ===== 核心：动态计算图片高度（不裁剪版本） =====
-function calculateImageHeight() {
-  const windowHeight = window.innerHeight;
-  const windowWidth = window.innerWidth;
-  const isLandscape = windowWidth > windowHeight;
-  
-  // 计算标题和状态区域的高度
-  const headerHeight = document.querySelector('h1').offsetHeight;
-  const statusHeight = document.getElementById('status').offsetHeight;
-  const controlsHeight = document.querySelector('.controls').offsetHeight;
-  
-  // 计算可用高度
-  const padding = isLandscape ? 20 : 25;
-  const availableHeight = windowHeight - headerHeight - statusHeight - controlsHeight - padding;
-  
-  let imageHeight;
-  
-  // 横屏时（手机和iPad横屏） - 最大化
-  if (isLandscape) {
-    if (windowWidth >= 768) { // iPad横屏
-      imageHeight = Math.min(availableHeight * 0.95, windowHeight * 0.75);
-      imageHeight = Math.max(imageHeight, 320);
-    } else { // 手机横屏
-      imageHeight = Math.min(availableHeight * 0.92, windowHeight * 0.70);
-      imageHeight = Math.max(imageHeight, 240);
-    }
-  } 
-  // 竖屏时
-  else {
-    if (windowWidth >= 768) { // iPad竖屏
-      imageHeight = Math.min(availableHeight * 0.85, windowHeight * 0.65);
-      imageHeight = Math.max(imageHeight, 260);
-    } else { // 手机竖屏
-      imageHeight = Math.min(availableHeight * 0.80, windowHeight * 0.60);
-      imageHeight = Math.max(imageHeight, 190);
-    }
-  }
-  
-  // 应用到图片容器 - 确保两张图片高度完全相同
-  const wrappers = document.querySelectorAll('.image-wrapper');
-  wrappers.forEach(wrapper => {
-    wrapper.style.height = `${imageHeight}px`;
-  });
-  
-  return imageHeight;
+// ===== Firebase 配置 =====
+const firebaseConfig = {
+  apiKey: "AIzaSyCFykLGib_3YKORCONFthXMDgJYbl0L9QQ",
+  authDomain: "water-6a6f2.firebaseapp.com",
+  projectId: "water-6a6f2",
+  storageBucket: "water-6a6f2.firebasestorage.app",
+  messagingSenderId: "533073759068",
+  appId: "1:533073759068:web:cd2fe9fd587faaefc18f99"
+};
+
+// 初始化 Firebase
+try {
+  firebase.initializeApp(firebaseConfig);
+  console.log('✅ Firebase 初始化成功！');
+} catch (err) {
+  console.log('Firebase初始化:', err.message);
 }
 
-// ===== 预加载图片并调整显示 =====
-function adjustImageDisplay() {
-  // 给图片加载时间
-  setTimeout(() => {
-    const images = [img1, img2];
-    images.forEach(img => {
-      if (img.complete && img.naturalHeight > 0) {
-        // 确保图片完整显示，不裁剪
-        img.style.objectFit = 'scale-down';
-      }
-    });
-  }, 100);
-}
+const db = firebase.firestore();
 
-// ===== 参数 =====
+// ===== 游戏参数 =====
 const totalImages = 70;
 const images = Array.from({length: totalImages}, (_, i) => `${String(i + 1).padStart(3, "0")}.jpg`);
 
-// 状态变量
+// 游戏状态
 let poolA = [...images];
 let winnersPool = [];
 let currentPair = [];
@@ -297,7 +348,58 @@ const reviveBtn = document.getElementById('reviveBtn');
 const winnerBanner = document.getElementById('winnerBanner');
 const bgMusic = document.getElementById('bgMusic');
 
-// ===== 彩带效果 =====
+// ===== 游戏核心函数 =====
+function calculateImageHeight() {
+  const windowHeight = window.innerHeight;
+  const windowWidth = window.innerWidth;
+  const isLandscape = windowWidth > windowHeight;
+  
+  const headerHeight = document.querySelector('h1').offsetHeight;
+  const statusHeight = document.getElementById('status').offsetHeight;
+  const controlsHeight = document.querySelector('.controls').offsetHeight;
+  
+  const padding = isLandscape ? 20 : 25;
+  const availableHeight = windowHeight - headerHeight - statusHeight - controlsHeight - padding;
+  
+  let imageHeight;
+  
+  if (isLandscape) {
+    if (windowWidth >= 768) {
+      imageHeight = Math.min(availableHeight * 0.95, windowHeight * 0.75);
+      imageHeight = Math.max(imageHeight, 320);
+    } else {
+      imageHeight = Math.min(availableHeight * 0.92, windowHeight * 0.70);
+      imageHeight = Math.max(imageHeight, 240);
+    }
+  } else {
+    if (windowWidth >= 768) {
+      imageHeight = Math.min(availableHeight * 0.85, windowHeight * 0.65);
+      imageHeight = Math.max(imageHeight, 260);
+    } else {
+      imageHeight = Math.min(availableHeight * 0.80, windowHeight * 0.60);
+      imageHeight = Math.max(imageHeight, 190);
+    }
+  }
+  
+  const wrappers = document.querySelectorAll('.image-wrapper');
+  wrappers.forEach(wrapper => {
+    wrapper.style.height = `${imageHeight}px`;
+  });
+  
+  return imageHeight;
+}
+
+function adjustImageDisplay() {
+  setTimeout(() => {
+    const images = [img1, img2];
+    images.forEach(img => {
+      if (img.complete && img.naturalHeight > 0) {
+        img.style.objectFit = 'scale-down';
+      }
+    });
+  }, 100);
+}
+
 function confettiEffect(count = 40) {
   for (let i = 0; i < count; i++) {
     const c = document.createElement('div');
@@ -310,7 +412,6 @@ function confettiEffect(count = 40) {
   }
 }
 
-// ===== 背景音乐首次点击 =====
 document.body.addEventListener('click', () => {
   if (!firstClickDone) {
     firstClickDone = true;
@@ -320,7 +421,6 @@ document.body.addEventListener('click', () => {
   }
 }, {once: true});
 
-// ===== 随机选择两个不同的元素 =====
 function getRandomPair(arr) {
   if (arr.length < 2) return arr;
   const idx1 = Math.floor(Math.random() * arr.length);
@@ -329,7 +429,6 @@ function getRandomPair(arr) {
   return [arr[idx1], arr[idx2]];
 }
 
-// ===== 更新对决状态 =====
 function updateGameState() {
   if (poolA.length === 0 && winnersPool.length === 0) {
     gameState = 'finished';
@@ -347,7 +446,6 @@ function updateGameState() {
   selectNextPair();
 }
 
-// ===== 选择下一对 =====
 function selectNextPair() {
   if (gameState === 'finished') return;
   
@@ -367,15 +465,11 @@ function selectNextPair() {
   img1.src = currentPair[0];
   img2.src = currentPair[1];
   
-  // 调整图片显示
-  adjustImageDisplay();
-  
   if (lastLoser && !reviveUsed) {
     reviveBtn.style.display = 'inline';
   }
 }
 
-// ===== 点击选择 =====
 function selectImage(idx) {
   const winner = currentPair[idx];
   const loser = currentPair[1 - idx];
@@ -414,7 +508,6 @@ function selectImage(idx) {
   updateGameState();
 }
 
-// ===== 复活按钮 =====
 reviveBtn.onclick = () => {
   if (lastLoser && !reviveUsed) {
     poolA.push(lastLoser);
@@ -431,8 +524,135 @@ reviveBtn.onclick = () => {
   }
 }
 
-// ===== 显示冠军 =====
-function showChampion(img) {
+// ===== Firebase统计函数 =====
+async function submitToGlobalStats(imageName) {
+  try {
+    await db.collection('votes').add({
+      image: imageName,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    console.log('✅ 选择已提交到全球统计');
+    return true;
+  } catch (error) {
+    console.error('提交失败:', error);
+    const localData = JSON.parse(localStorage.getItem('heartGlobalStats') || '{"total":0,"rankings":{}}');
+    localData.total = (localData.total || 0) + 1;
+    localData.rankings[imageName] = (localData.rankings[imageName] || 0) + 1;
+    localStorage.setItem('heartGlobalStats', JSON.stringify(localData));
+    return false;
+  }
+}
+
+async function loadGlobalStats() {
+  try {
+    const votesSnapshot = await db.collection('votes').get();
+    const totalVotes = votesSnapshot.size;
+    
+    const voteCounts = {};
+    votesSnapshot.forEach(doc => {
+      const data = doc.data();
+      const image = data.image;
+      voteCounts[image] = (voteCounts[image] || 0) + 1;
+    });
+    
+    const rankings = Object.entries(voteCounts)
+      .map(([image, votes]) => ({
+        image,
+        name: `心动${image.replace('.jpg', '')}号`,
+        votes
+      }))
+      .sort((a, b) => b.votes - a.votes)
+      .slice(0, 10);
+    
+    return {
+      total: totalVotes,
+      rankings,
+      lastUpdated: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('获取全球数据失败:', error);
+    return getLocalStats();
+  }
+}
+
+function getLocalStats() {
+  const localData = JSON.parse(localStorage.getItem('heartGlobalStats') || '{"total":0,"rankings":{}}');
+  
+  const rankings = Object.entries(localData.rankings || {})
+    .map(([image, votes]) => ({
+      image,
+      name: `心动${image.replace('.jpg', '')}号`,
+      votes
+    }))
+    .sort((a, b) => b.votes - a.votes)
+    .slice(0, 5);
+  
+  return {
+    total: localData.total || 0,
+    rankings,
+    lastUpdated: new Date().toISOString()
+  };
+}
+
+let unsubscribeStats = null;
+
+function startRealtimeUpdates() {
+  if (unsubscribeStats) {
+    unsubscribeStats();
+  }
+  
+  unsubscribeStats = db.collection('votes')
+    .orderBy('timestamp', 'desc')
+    .limit(1)
+    .onSnapshot((snapshot) => {
+      if (document.getElementById('globalStatsPanel').style.display === 'block') {
+        updateStatsDisplay();
+      }
+    }, (error) => {
+      console.error('实时监听失败:', error);
+    });
+}
+
+async function updateStatsDisplay() {
+  try {
+    document.getElementById('statsList').innerHTML = '<div class="loading">正在加载最新数据...</div>';
+    
+    const stats = await loadGlobalStats();
+    
+    document.getElementById('totalVotes').textContent = 
+      `总投票数：${stats.total.toLocaleString()} 票`;
+    
+    if (stats.rankings.length === 0) {
+      document.getElementById('statsList').innerHTML = 
+        '<div class="loading">暂无数据，成为第一个投票者吧！</div>';
+      return;
+    }
+    
+    const rankingsHtml = stats.rankings.map((item, index) => `
+      <div class="stat-item">
+        <div class="stat-rank ${index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : ''}">
+          ${index + 1}
+        </div>
+        <img src="${item.image}" class="stat-img" alt="${item.name}" 
+             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNGRkYiLz48dGV4dCB4PSIyMCIgeT0iMjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9IjQiPuaXoOazlea3tDwvdGV4dD48L3N2Zz4='">
+        <div class="stat-info">
+          <div class="stat-name">${item.name}</div>
+          <div class="stat-votes">${item.votes.toLocaleString()} 票</div>
+        </div>
+      </div>
+    `).join('');
+    
+    document.getElementById('statsList').innerHTML = rankingsHtml;
+    
+  } catch (error) {
+    console.error('更新显示失败:', error);
+    document.getElementById('statsList').innerHTML = 
+      '<div class="loading">数据加载失败，请刷新重试</div>';
+  }
+}
+
+// ===== 修改后的showChampion函数 =====
+async function showChampion(img) {
   gameState = 'finished';
   img1.style.display = 'none';
   img2.style.display = 'none';
@@ -446,13 +666,47 @@ function showChampion(img) {
     </div>
     <img src="${img}" class="winner-image">
     <div style="margin-top: 8px; font-size: 0.9em;">
-      连胜记录：${streak} 次
+      连胜记录：${streak} 次<br>
+      <span style="color: #36c; font-size: 0.8em;">✨ 你的选择已加入全球统计</span>
     </div>
   `;
+  
+  await submitToGlobalStats(img);
   
   confettiEffect(150);
   bgMusic.pause();
 }
+
+// ===== 统计面板交互 =====
+document.getElementById('globalStatsBtn').addEventListener('click', async function() {
+  const panel = document.getElementById('globalStatsPanel');
+  if (panel.style.display === 'block') {
+    panel.style.display = 'none';
+    if (unsubscribeStats) {
+      unsubscribeStats();
+      unsubscribeStats = null;
+    }
+  } else {
+    panel.style.display = 'block';
+    await updateStatsDisplay();
+    startRealtimeUpdates();
+  }
+});
+
+document.addEventListener('click', function(event) {
+  const panel = document.getElementById('globalStatsPanel');
+  const btn = document.getElementById('globalStatsBtn');
+  
+  if (panel.style.display === 'block' && 
+      !panel.contains(event.target) && 
+      !btn.contains(event.target)) {
+    panel.style.display = 'none';
+    if (unsubscribeStats) {
+      unsubscribeStats();
+      unsubscribeStats = null;
+    }
+  }
+});
 
 // ===== 绑定点击事件 =====
 img1.onclick = () => selectImage(0);
@@ -461,7 +715,6 @@ img2.onclick = () => selectImage(1);
 // ===== 启动游戏 =====
 updateGameState();
 
-// ===== 监听窗口变化 =====
 window.addEventListener('resize', () => {
   calculateImageHeight();
   adjustImageDisplay();
@@ -474,11 +727,12 @@ window.addEventListener('orientationchange', () => {
   }, 150);
 });
 
-// 初始计算
 setTimeout(() => {
   calculateImageHeight();
   adjustImageDisplay();
 }, 50);
+
+setTimeout(startRealtimeUpdates, 2000);
 </script>
 </body>
 </html>
