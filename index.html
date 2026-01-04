@@ -53,23 +53,25 @@ h1 {
 
 .image-wrapper {
   flex: 1;
-  max-width: 49.8%; /* 几乎各占一半 */
+  max-width: 49.9%; /* 几乎各占一半 */
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
   /* 高度通过JS动态设置 */
+  position: relative;
 }
 
 img {
-  width: auto;
-  height: 100%;
+  /* 关键：不设置object-fit，不裁剪 */
   max-width: 100%;
-  object-fit: scale-down; /* 关键：等比例缩小，不裁剪 */
+  max-height: 100%;
+  width: auto;
+  height: auto;
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  /* 图片保持原始比例，只是缩小 */
 }
 
 img:hover {
@@ -132,17 +134,12 @@ img:hover {
   max-height: 60vh;
   border-radius: 10px;
   margin: 8px auto;
-  object-fit: scale-down;
 }
 
 /* 横屏时 */
 @media (orientation: landscape) {
   body {
     padding: 8px;
-  }
-  
-  .images-container {
-    gap: 3px; /* 横屏也极小间距 */
   }
 }
 
@@ -159,10 +156,6 @@ img:hover {
   #status {
     margin: 0 0 8px;
   }
-  
-  .images-container {
-    gap: 4px;
-  }
 }
 
 /* 手机竖屏 */
@@ -172,18 +165,14 @@ img:hover {
   }
   
   .images-container {
-    gap: 1px; /* 手机竖屏几乎无间距 */
-  }
-  
-  img {
-    border-radius: 3px;
+    gap: 1px;
   }
 }
 
 /* 大屏幕 */
 @media (min-width: 1024px) {
-  .images-container {
-    gap: 5px;
+  body {
+    padding: 12px;
   }
 }
 </style>
@@ -213,8 +202,8 @@ img:hover {
 </audio>
 
 <script>
-// ===== 核心：动态计算图片高度（不裁剪版本） =====
-function calculateImageHeight() {
+// ===== 核心：等比例缩放图片，不裁剪 =====
+function calculateAndResizeImages() {
   const windowHeight = window.innerHeight;
   const windowWidth = window.innerWidth;
   const isLandscape = windowWidth > windowHeight;
@@ -228,50 +217,72 @@ function calculateImageHeight() {
   const padding = isLandscape ? 20 : 25;
   const availableHeight = windowHeight - headerHeight - statusHeight - controlsHeight - padding;
   
-  let imageHeight;
+  // 根据设备和方向确定最大图片高度
+  let maxImageHeight;
   
-  // 横屏时（手机和iPad横屏） - 最大化
   if (isLandscape) {
     if (windowWidth >= 768) { // iPad横屏
-      imageHeight = Math.min(availableHeight * 0.95, windowHeight * 0.75);
-      imageHeight = Math.max(imageHeight, 320);
+      maxImageHeight = Math.min(availableHeight * 0.95, windowHeight * 0.75);
+      maxImageHeight = Math.max(maxImageHeight, 320);
     } else { // 手机横屏
-      imageHeight = Math.min(availableHeight * 0.92, windowHeight * 0.70);
-      imageHeight = Math.max(imageHeight, 240);
+      maxImageHeight = Math.min(availableHeight * 0.92, windowHeight * 0.70);
+      maxImageHeight = Math.max(maxImageHeight, 240);
     }
-  } 
-  // 竖屏时
-  else {
+  } else {
     if (windowWidth >= 768) { // iPad竖屏
-      imageHeight = Math.min(availableHeight * 0.85, windowHeight * 0.65);
-      imageHeight = Math.max(imageHeight, 260);
+      maxImageHeight = Math.min(availableHeight * 0.85, windowHeight * 0.65);
+      maxImageHeight = Math.max(maxImageHeight, 260);
     } else { // 手机竖屏
-      imageHeight = Math.min(availableHeight * 0.80, windowHeight * 0.60);
-      imageHeight = Math.max(imageHeight, 190);
+      maxImageHeight = Math.min(availableHeight * 0.80, windowHeight * 0.60);
+      maxImageHeight = Math.max(maxImageHeight, 190);
     }
   }
   
-  // 应用到图片容器 - 确保两张图片高度完全相同
+  // 确保两张图片容器高度相同
   const wrappers = document.querySelectorAll('.image-wrapper');
   wrappers.forEach(wrapper => {
-    wrapper.style.height = `${imageHeight}px`;
+    wrapper.style.height = `${maxImageHeight}px`;
   });
   
-  return imageHeight;
+  // 等比例调整图片大小
+  resizeImagesToSameHeight(maxImageHeight);
+  
+  return maxImageHeight;
 }
 
-// ===== 预加载图片并调整显示 =====
-function adjustImageDisplay() {
-  // 给图片加载时间
-  setTimeout(() => {
-    const images = [img1, img2];
-    images.forEach(img => {
-      if (img.complete && img.naturalHeight > 0) {
-        // 确保图片完整显示，不裁剪
-        img.style.objectFit = 'scale-down';
-      }
-    });
-  }, 100);
+// ===== 等比例调整图片到相同高度 =====
+function resizeImagesToSameHeight(targetHeight) {
+  const images = [img1, img2];
+  
+  images.forEach(img => {
+    if (img.src && img.complete && img.naturalHeight > 0) {
+      // 计算等比例缩放后的尺寸
+      const naturalWidth = img.naturalWidth;
+      const naturalHeight = img.naturalHeight;
+      
+      // 等比例缩放：高度 = targetHeight，宽度按比例计算
+      const newHeight = targetHeight;
+      const newWidth = (naturalWidth / naturalHeight) * targetHeight;
+      
+      // 应用等比例缩放
+      img.style.width = `${newWidth}px`;
+      img.style.height = `${newHeight}px`;
+      img.style.maxWidth = '100%';
+      img.style.maxHeight = '100%';
+      
+      // 关键：不裁剪，只是缩小
+      img.style.objectFit = 'none'; // 不用任何裁剪
+      img.style.objectPosition = 'center';
+    }
+  });
+}
+
+// ===== 图片加载后重新调整 =====
+function onImageLoad(imgElement) {
+  if (imgElement.complete) {
+    const currentHeight = calculateAndResizeImages();
+    resizeImagesToSameHeight(currentHeight);
+  }
 }
 
 // ===== 参数 =====
@@ -296,6 +307,10 @@ const status = document.getElementById('status');
 const reviveBtn = document.getElementById('reviveBtn');
 const winnerBanner = document.getElementById('winnerBanner');
 const bgMusic = document.getElementById('bgMusic');
+
+// 监听图片加载
+img1.onload = () => onImageLoad(img1);
+img2.onload = () => onImageLoad(img2);
 
 // ===== 彩带效果 =====
 function confettiEffect(count = 40) {
@@ -367,8 +382,10 @@ function selectNextPair() {
   img1.src = currentPair[0];
   img2.src = currentPair[1];
   
-  // 调整图片显示
-  adjustImageDisplay();
+  // 图片加载后会自动调整
+  setTimeout(() => {
+    calculateAndResizeImages();
+  }, 100);
   
   if (lastLoser && !reviveUsed) {
     reviveBtn.style.display = 'inline';
@@ -462,23 +479,13 @@ img2.onclick = () => selectImage(1);
 updateGameState();
 
 // ===== 监听窗口变化 =====
-window.addEventListener('resize', () => {
-  calculateImageHeight();
-  adjustImageDisplay();
-});
-
+window.addEventListener('resize', calculateAndResizeImages);
 window.addEventListener('orientationchange', () => {
-  setTimeout(() => {
-    calculateImageHeight();
-    adjustImageDisplay();
-  }, 150);
+  setTimeout(calculateAndResizeImages, 150);
 });
 
 // 初始计算
-setTimeout(() => {
-  calculateImageHeight();
-  adjustImageDisplay();
-}, 50);
+setTimeout(calculateAndResizeImages, 100);
 </script>
 </body>
 </html>
