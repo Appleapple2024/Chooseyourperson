@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>心动淘汰赛</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
 * {
   margin: 0;
@@ -17,23 +18,26 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 15px;
+  padding: 12px;
 }
 
 h1 {
-  margin: 0 0 10px;
-  font-size: 1.8em;
+  margin: 0 0 8px;
+  font-size: clamp(1.5em, 4vw, 2em);
   color: #ff6b9d;
+  flex-shrink: 0;
 }
 
 #status {
-  margin: 0 0 15px;
-  font-size: 1.2em;
-  min-height: 40px;
+  margin: 0 0 12px;
+  font-size: clamp(1em, 3vw, 1.3em);
+  min-height: 2.5em;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #555;
+  flex-shrink: 0;
+  padding: 0 5px;
 }
 
 .images-container {
@@ -41,15 +45,15 @@ h1 {
   justify-content: center;
   align-items: center;
   gap: 15px;
-  margin: 10px 0;
+  margin: 0 0 10px;
   flex: 1;
   width: 100%;
+  min-height: 180px;
 }
 
 .image-wrapper {
   flex: 1;
-  max-width: 45%;
-  height: 180px; /* iPhone合适的高度 */
+  max-width: 48%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -58,6 +62,7 @@ h1 {
   background: #fff;
   box-shadow: 0 3px 10px rgba(0,0,0,0.08);
   overflow: hidden;
+  /* 高度通过JS动态设置 */
 }
 
 img {
@@ -76,13 +81,20 @@ img:hover {
 }
 
 .controls {
-  margin: 15px 0 0;
-  min-height: 60px;
+  margin: 10px 0 5px;
+  min-height: 50px;
+  flex-shrink: 0;
+}
+
+#winnerBanner {
+  font-size: 1.5em;
+  margin: 15px 0;
+  display: none;
 }
 
 #reviveBtn {
   display: none;
-  margin: 10px auto;
+  margin: 8px auto;
   padding: 10px 22px;
   font-size: 1em;
   cursor: pointer;
@@ -93,33 +105,71 @@ img:hover {
   font-weight: 500;
 }
 
-/* ===== 关键：根据设备类型调整 ===== */
+.confetti {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  top: -10px;
+  z-index: 9999;
+  pointer-events: none;
+  animation: fall linear forwards;
+}
 
-/* iPad识别 */
-@media (min-width: 768px) {
-  .image-wrapper {
-    height: 240px; /* iPad上更大 */
+@keyframes fall {
+  from { transform: translateY(0) rotate(0deg); }
+  to { transform: translateY(100vh) rotate(360deg); }
+}
+
+.flash {
+  animation: flash 0.5s 6 alternate;
+  border-color: gold !important;
+}
+
+@keyframes flash {
+  from { box-shadow: 0 0 5px gold; }
+  to { box-shadow: 0 0 20px gold; }
+}
+
+.winner-image {
+  max-width: 70%;
+  max-height: 50vh;
+  border: 6px solid gold !important;
+  border-radius: 15px;
+  margin: 15px auto;
+}
+
+/* 手机竖屏 */
+@media (max-width: 767px) and (orientation: portrait) {
+  body {
+    padding: 10px;
   }
   
+  .images-container {
+    gap: 12px;
+  }
+}
+
+/* 手机横屏 */
+@media (max-width: 767px) and (orientation: landscape) {
+  .images-container {
+    gap: 20px;
+  }
+}
+
+/* iPad & 平板 */
+@media (min-width: 768px) {
   body {
     padding: 20px;
   }
   
   h1 {
-    font-size: 2em;
     margin: 0 0 15px;
+    font-size: clamp(1.8em, 4vw, 2.5em);
   }
   
   #status {
-    font-size: 1.3em;
     margin: 0 0 20px;
-  }
-}
-
-/* iPad横屏 */
-@media (min-width: 768px) and (orientation: landscape) {
-  .image-wrapper {
-    height: 280px; /* 横屏时更大 */
+    font-size: clamp(1.2em, 3vw, 1.5em);
   }
   
   .images-container {
@@ -127,64 +177,279 @@ img:hover {
   }
 }
 
-/* 大屏幕电脑 */
+/* iPad横屏 */
+@media (min-width: 768px) and (orientation: landscape) {
+  .images-container {
+    gap: 35px;
+  }
+}
+
+/* 大屏幕 */
 @media (min-width: 1024px) {
-  .image-wrapper {
-    height: 260px;
-    max-width: 40%;
-  }
-  
-  .images-container {
-    gap: 30px;
-  }
-}
-
-/* 手机竖屏（主要场景） */
-@media (max-width: 767px) and (orientation: portrait) {
-  .image-wrapper {
-    height: 180px;
-  }
-}
-
-/* 手机横屏 */
-@media (max-width: 767px) and (orientation: landscape) {
-  .image-wrapper {
-    height: 160px; /* 横屏高度小一些，宽度够 */
-  }
-}
-
-/* 小手机 */
-@media (max-width: 480px) {
   body {
-    padding: 10px;
-  }
-  
-  .image-wrapper {
-    height: 150px;
-  }
-  
-  h1 {
-    font-size: 1.5em;
-  }
-  
-  #status {
-    font-size: 1.1em;
-  }
-}
-
-/* 超小手机 */
-@media (max-width: 360px) {
-  .image-wrapper {
-    height: 130px;
+    padding: 25px;
   }
   
   .images-container {
-    gap: 10px;
+    gap: 40px;
   }
 }
 </style>
 </head>
 <body>
-<!-- 页面内容保持不变 -->
+
+<h1>💗 心动淘汰赛 💗</h1>
+<div id="status">来吧，第一眼——你对谁最心动？</div>
+
+<div class="images-container">
+  <div class="image-wrapper">
+    <img id="img1" src="">
+  </div>
+  <div class="image-wrapper">
+    <img id="img2" src="">
+  </div>
+</div>
+
+<div class="controls">
+  <button id="reviveBtn">等等我反悔了，再给她一次机会 😭</button>
+  <div id="winnerBanner"></div>
+</div>
+
+<audio id="bgMusic" loop volume="0.35">
+  <source src="bgmusic.mp3" type="audio/mpeg">
+  <source src="bgmusic.m4a" type="audio/mp4">
+</audio>
+
+<script>
+// ===== 核心：动态计算图片高度 =====
+function calculateImageHeight() {
+  const windowHeight = window.innerHeight;
+  const windowWidth = window.innerWidth;
+  
+  // 计算标题和状态区域的高度
+  const headerHeight = document.querySelector('h1').offsetHeight;
+  const statusHeight = document.getElementById('status').offsetHeight;
+  const controlsHeight = document.querySelector('.controls').offsetHeight;
+  
+  // 计算可用高度（总高度减去其他元素高度和间距）
+  const padding = 50; // 上下padding预留空间
+  const availableHeight = windowHeight - headerHeight - statusHeight - controlsHeight - padding;
+  
+  // 根据屏幕方向调整高度
+  let imageHeight;
+  
+  if (windowWidth >= 768) { // iPad及以上
+    imageHeight = Math.min(availableHeight * 0.7, windowHeight * 0.55);
+    imageHeight = Math.max(imageHeight, 250); // 最小250px
+  } else if (windowWidth >= 480) { // 普通手机
+    imageHeight = Math.min(availableHeight * 0.65, windowHeight * 0.45);
+    imageHeight = Math.max(imageHeight, 180); // 最小180px
+  } else { // 小手机
+    imageHeight = Math.min(availableHeight * 0.6, windowHeight * 0.4);
+    imageHeight = Math.max(imageHeight, 150); // 最小150px
+  }
+  
+  // 应用到图片容器
+  const wrappers = document.querySelectorAll('.image-wrapper');
+  wrappers.forEach(wrapper => {
+    wrapper.style.height = `${imageHeight}px`;
+  });
+  
+  return imageHeight;
+}
+
+// ===== 参数 =====
+const totalImages = 70;
+const images = Array.from({length: totalImages}, (_, i) => `${String(i + 1).padStart(3, "0")}.jpg`);
+
+// 状态变量
+let poolA = [...images];
+let winnersPool = [];
+let currentPair = [];
+let lastLoser = null;
+let reviveUsed = false;
+let streakPlayer = null;
+let streak = 0;
+let firstClickDone = false;
+let gameState = 'initial';
+
+// DOM元素
+const img1 = document.getElementById('img1');
+const img2 = document.getElementById('img2');
+const status = document.getElementById('status');
+const reviveBtn = document.getElementById('reviveBtn');
+const winnerBanner = document.getElementById('winnerBanner');
+const bgMusic = document.getElementById('bgMusic');
+
+// ===== 彩带效果 =====
+function confettiEffect(count = 40) {
+  for (let i = 0; i < count; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = `hsl(${Math.random() * 360}, 70%, 65%)`;
+    c.style.animationDuration = (2 + Math.random() * 1.2) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 3000);
+  }
+}
+
+// ===== 背景音乐首次点击 =====
+document.body.addEventListener('click', () => {
+  if (!firstClickDone) {
+    firstClickDone = true;
+    bgMusic.volume = 0.35;
+    bgMusic.play().catch(() => {});
+    confettiEffect(15);
+  }
+}, {once: true});
+
+// ===== 随机选择两个不同的元素 =====
+function getRandomPair(arr) {
+  if (arr.length < 2) return arr;
+  const idx1 = Math.floor(Math.random() * arr.length);
+  let idx2 = Math.floor(Math.random() * (arr.length - 1));
+  if (idx2 >= idx1) idx2++;
+  return [arr[idx1], arr[idx2]];
+}
+
+// ===== 更新对决状态 =====
+function updateGameState() {
+  if (poolA.length === 0 && winnersPool.length === 0) {
+    gameState = 'finished';
+  } else if (poolA.length >= 2) {
+    gameState = 'poolA_vs_poolA';
+  } else if (poolA.length === 1 && winnersPool.length > 0) {
+    gameState = 'poolA_vs_winnersPool';
+  } else if (winnersPool.length >= 2) {
+    gameState = 'winnersPool_vs_winnersPool';
+  } else if (winnersPool.length === 1 && poolA.length === 0) {
+    showChampion(winnersPool[0]);
+    return;
+  }
+  
+  selectNextPair();
+}
+
+// ===== 选择下一对 =====
+function selectNextPair() {
+  if (gameState === 'finished') return;
+  
+  if (gameState === 'poolA_vs_poolA') {
+    currentPair = getRandomPair(poolA);
+    status.textContent = `初遇心动 ${poolA.length} 张待选`;
+  } else if (gameState === 'poolA_vs_winnersPool') {
+    const fromPoolA = poolA[0];
+    const fromWinners = winnersPool[Math.floor(Math.random() * winnersPool.length)];
+    currentPair = [fromPoolA, fromWinners];
+    status.textContent = `新面孔 vs 心动老友`;
+  } else if (gameState === 'winnersPool_vs_winnersPool') {
+    currentPair = getRandomPair(winnersPool);
+    status.textContent = `强强对决 ${winnersPool.length} 位心动选手`;
+  }
+  
+  img1.src = currentPair[0];
+  img2.src = currentPair[1];
+  
+  if (lastLoser && !reviveUsed) {
+    reviveBtn.style.display = 'inline';
+  }
+}
+
+// ===== 点击选择 =====
+function selectImage(idx) {
+  const winner = currentPair[idx];
+  const loser = currentPair[1 - idx];
+  
+  if (!winnersPool.includes(winner)) {
+    winnersPool.push(winner);
+  }
+  
+  if (poolA.includes(loser)) {
+    poolA = poolA.filter(img => img !== loser);
+  }
+  if (winnersPool.includes(loser)) {
+    winnersPool = winnersPool.filter(img => img !== loser);
+  }
+  
+  if (poolA.includes(winner)) {
+    poolA = poolA.filter(img => img !== winner);
+  }
+  
+  lastLoser = loser;
+  
+  if (streakPlayer === winner) {
+    streak++;
+  } else {
+    streakPlayer = winner;
+    streak = 1;
+  }
+  
+  if (streak % 10 === 0) {
+    confettiEffect(80);
+    status.textContent = `天呐！已经连续 ${streak} 次为她心动 💘`;
+  } else {
+    status.textContent = `已连续 ${streak} 次选择她 💓`;
+  }
+  
+  updateGameState();
+}
+
+// ===== 复活按钮 =====
+reviveBtn.onclick = () => {
+  if (lastLoser && !reviveUsed) {
+    poolA.push(lastLoser);
+    reviveUsed = true;
+    reviveBtn.style.display = 'none';
+    status.textContent = '她带着你的心意回来了 💖';
+    confettiEffect(12);
+    
+    if (currentPair.includes(lastLoser)) {
+      const flashImg = currentPair[0] === lastLoser ? img1 : img2;
+      flashImg.classList.add('flash');
+      setTimeout(() => flashImg.classList.remove('flash'), 3000);
+    }
+  }
+}
+
+// ===== 显示冠军 =====
+function showChampion(img) {
+  gameState = 'finished';
+  img1.style.display = 'none';
+  img2.style.display = 'none';
+  reviveBtn.style.display = 'none';
+  status.style.display = 'none';
+  
+  winnerBanner.style.display = 'block';
+  winnerBanner.innerHTML = `
+    <div style="margin-bottom: 15px; font-weight: bold;">
+      🎉 最终胜出！她就是你的心选 🎉
+    </div>
+    <img src="${img}" class="winner-image">
+    <div style="margin-top: 10px; font-size: 0.9em;">
+      连胜记录：${streak} 次
+    </div>
+  `;
+  
+  confettiEffect(150);
+  bgMusic.pause();
+}
+
+// ===== 绑定点击事件 =====
+img1.onclick = () => selectImage(0);
+img2.onclick = () => selectImage(1);
+
+// ===== 启动游戏 =====
+updateGameState();
+
+// ===== 监听窗口大小变化 =====
+window.addEventListener('resize', calculateImageHeight);
+window.addEventListener('orientationchange', () => {
+  setTimeout(calculateImageHeight, 100);
+});
+
+// 初始计算图片高度
+setTimeout(calculateImageHeight, 50);
+</script>
 </body>
 </html>
