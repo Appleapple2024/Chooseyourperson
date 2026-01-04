@@ -18,20 +18,20 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 10px;
+  padding: 8px;
 }
 
 h1 {
-  margin: 0 0 6px;
+  margin: 0 0 5px;
   font-size: clamp(1.5em, 5vw, 2.2em);
   color: #ff6b9d;
   flex-shrink: 0;
 }
 
 #status {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   font-size: clamp(1em, 4vw, 1.3em);
-  min-height: 2.2em;
+  min-height: 2em;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -44,8 +44,8 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px; /* 减少间距 */
-  margin: 0 0 8px;
+  gap: 4px; /* 非常小的间距 */
+  margin: 0 0 5px;
   flex: 1;
   width: 100%;
   min-height: 150px;
@@ -53,34 +53,36 @@ h1 {
 
 .image-wrapper {
   flex: 1;
-  max-width: 49%; /* 增大到49% */
+  max-width: 49.5%; /* 几乎各占一半 */
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid #eee; /* 边框变细 */
-  border-radius: 8px;
-  background: #fff;
+  /* 完全去掉边框和背景 */
+  border: none;
+  background: transparent;
   overflow: hidden;
   /* 高度通过JS动态设置 */
 }
 
 img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* 完整显示，不裁剪 */
+  width: auto;
+  height: 100%; /* 固定高度，宽度自动 */
+  max-width: 100%;
+  object-fit: contain; /* 等比例缩放，不裁剪 */
   cursor: pointer;
-  border-radius: 7px;
+  border-radius: 6px;
   transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* 用阴影代替边框 */
 }
 
 img:hover {
   transform: scale(1.02);
-  box-shadow: 0 0 15px rgba(255,105,180,0.2);
+  box-shadow: 0 4px 12px rgba(255,105,180,0.3);
 }
 
 .controls {
-  margin: 8px 0 5px;
-  min-height: 45px;
+  margin: 5px 0 0;
+  min-height: 40px;
   flex-shrink: 0;
 }
 
@@ -92,11 +94,11 @@ img:hover {
 
 #reviveBtn {
   display: none;
-  margin: 8px auto;
-  padding: 10px 22px;
-  font-size: 1em;
+  margin: 5px auto;
+  padding: 8px 18px;
+  font-size: 0.95em;
   cursor: pointer;
-  border-radius: 20px;
+  border-radius: 18px;
   border: none;
   background: linear-gradient(135deg, #ffb6c1, #ffd1dc);
   color: #333;
@@ -120,87 +122,78 @@ img:hover {
 
 .flash {
   animation: flash 0.5s 6 alternate;
-  border-color: gold !important;
+  box-shadow: 0 0 20px gold !important;
 }
 
 @keyframes flash {
   from { box-shadow: 0 0 5px gold; }
-  to { box-shadow: 0 0 20px gold; }
+  to { box-shadow: 0 0 25px gold; }
 }
 
 .winner-image {
   max-width: 80%;
   max-height: 60vh;
-  border: 6px solid gold !important;
-  border-radius: 15px;
-  margin: 15px auto;
+  border-radius: 12px;
+  margin: 10px auto;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
 }
 
 /* ===== 横屏优化 ===== */
 @media (orientation: landscape) {
-  body {
-    padding: 8px;
-  }
-  
   .images-container {
-    gap: 15px; /* 横屏时稍宽间距 */
+    gap: 6px; /* 横屏时稍大一点间距 */
   }
   
-  .image-wrapper {
-    max-width: 48%;
-    border-width: 2px; /* 横屏时边框稍粗一点 */
+  img {
+    border-radius: 8px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
   }
 }
 
 /* iPad横屏 - 最大化利用空间 */
 @media (min-width: 768px) and (orientation: landscape) {
   body {
-    padding: 15px;
+    padding: 12px;
   }
   
   h1 {
-    margin: 0 0 10px;
-    font-size: clamp(1.8em, 5vw, 2.5em);
+    margin: 0 0 8px;
   }
   
   #status {
-    margin: 0 0 15px;
-    font-size: clamp(1.2em, 4vw, 1.5em);
-  }
-  
-  .images-container {
-    gap: 20px; /* iPad横屏间距更大 */
-  }
-  
-  .image-wrapper {
-    max-width: 47%; /* 在iPad上更大 */
-    border: 2px solid #ddd;
-  }
-}
-
-/* 手机竖屏 */
-@media (max-width: 767px) and (orientation: portrait) {
-  body {
-    padding: 8px;
+    margin: 0 0 12px;
   }
   
   .images-container {
     gap: 8px;
   }
   
-  .image-wrapper {
-    border: 1px solid #eee;
+  img {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+}
+
+/* 手机竖屏（保持你喜欢的样式） */
+@media (max-width: 767px) and (orientation: portrait) {
+  body {
+    padding: 6px;
+  }
+  
+  .images-container {
+    gap: 3px;
+  }
+  
+  img {
+    border-radius: 5px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
   }
 }
 
 /* 大屏幕 */
 @media (min-width: 1024px) {
   .images-container {
-    gap: 25px;
-  }
-  
-  .image-wrapper {
-    max-width: 46%;
+    gap: 10px;
   }
 }
 </style>
@@ -242,7 +235,7 @@ function calculateImageHeight() {
   const controlsHeight = document.querySelector('.controls').offsetHeight;
   
   // 计算可用高度（总高度减去其他元素高度和间距）
-  const padding = isLandscape ? 30 : 40; // 横屏时减少padding
+  const padding = isLandscape ? 25 : 30; // 横屏时padding更小
   const availableHeight = windowHeight - headerHeight - statusHeight - controlsHeight - padding;
   
   // 根据设备和方向调整高度
@@ -250,22 +243,22 @@ function calculateImageHeight() {
   
   if (windowWidth >= 768) { // iPad及以上
     if (isLandscape) {
-      // iPad横屏：用更多空间
-      imageHeight = Math.min(availableHeight * 0.85, windowHeight * 0.65);
-      imageHeight = Math.max(imageHeight, 280);
+      // iPad横屏：用最大空间
+      imageHeight = Math.min(availableHeight * 0.90, windowHeight * 0.70);
+      imageHeight = Math.max(imageHeight, 300); // 最小300px
     } else {
       // iPad竖屏
-      imageHeight = Math.min(availableHeight * 0.75, windowHeight * 0.55);
+      imageHeight = Math.min(availableHeight * 0.80, windowHeight * 0.60);
       imageHeight = Math.max(imageHeight, 250);
     }
   } else { // 手机
     if (isLandscape) {
-      // 手机横屏：充分利用宽度
-      imageHeight = Math.min(availableHeight * 0.80, windowHeight * 0.60);
-      imageHeight = Math.max(imageHeight, 200);
+      // 手机横屏：最大化利用
+      imageHeight = Math.min(availableHeight * 0.85, windowHeight * 0.65);
+      imageHeight = Math.max(imageHeight, 220);
     } else {
-      // 手机竖屏（保持你满意的尺寸）
-      imageHeight = Math.min(availableHeight * 0.70, windowHeight * 0.50);
+      // 手机竖屏（保持你喜欢的尺寸）
+      imageHeight = Math.min(availableHeight * 0.75, windowHeight * 0.55);
       imageHeight = Math.max(imageHeight, 180);
     }
   }
@@ -443,7 +436,7 @@ function showChampion(img) {
   
   winnerBanner.style.display = 'block';
   winnerBanner.innerHTML = `
-    <div style="margin-bottom: 15px; font-weight: bold;">
+    <div style="margin-bottom: 10px; font-weight: bold;">
       🎉 最终胜出！她就是你的心选 🎉
     </div>
     <img src="${img}" class="winner-image">
